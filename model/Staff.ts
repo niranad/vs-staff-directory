@@ -8,5 +8,5 @@ export interface Staff {
   address: string;
   role: string;
   department: string;
-  gradeLevel: GradeLevel | null;
+  gradeLevel: string | null;
 }

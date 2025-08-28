@@ -2,7 +2,7 @@ import { Alert, Box, Button, IconButton, Menu, MenuItem, Snackbar, Table, TableB
 import AddIcon from '@mui/icons-material/Add';
 import { StaffForm } from "./forms/StaffForm";
 import { useStaffContext } from "@/context/staff/staff.context";
-import { MoreHoriz } from "@mui/icons-material";
+import { HourglassEmptyOutlined, MoreHoriz } from "@mui/icons-material";
 import { useMemo, useState } from "react";
 
 
@@ -81,6 +81,7 @@ export default function StaffDirectoryTable() {
             <TableHead>
               <TableRow>
                 {/* Table Headers */}
+                <TableCell>S/N</TableCell>
                 <TableCell>Name</TableCell>
                 <TableCell>Department</TableCell>
                 <TableCell>Role</TableCell>
@@ -95,13 +96,14 @@ export default function StaffDirectoryTable() {
               {
                 staff.length > 0 ? staff.map((s, i) => (
                   <TableRow key={s.id + i} hover onClick={() => toggleFlipped()} style={{ cursor: 'pointer' }}>
+                    <TableCell>{i+1}</TableCell>
                     <TableCell>{s.name}</TableCell>
                     <TableCell>{s.department}</TableCell>
                     <TableCell>{s.role}</TableCell>
                     <TableCell>{s.country}</TableCell>
                     <TableCell>{s.state}</TableCell>
                     <TableCell>{s.address}</TableCell>  
-                    <TableCell>{s.gradeLevel ? s.gradeLevel.level : 'N/A'}</TableCell>
+                    <TableCell>{s.gradeLevel ? s.gradeLevel : 'N/A'}</TableCell>
                     <TableCell>
                       <Box>
                         <IconButton onClick={handleMenuClick}>
@@ -126,7 +128,12 @@ export default function StaffDirectoryTable() {
                   </TableRow>
                 )) : (
                   <TableRow>
-
+                    <TableCell colSpan={9}>
+                      <Box className="w-full h-[250px] flex flex-col justify-center items-center">
+                        <HourglassEmptyOutlined />
+                        <Typography>No data available</Typography>
+                      </Box>
+                    </TableCell>
                   </TableRow>
                 )
               }
@@ -153,13 +160,11 @@ export default function StaffDirectoryTable() {
             Back to List
           </Button>
           <Box className="flex flex-col items-center justify-center h-full">
-            <Box className="text-center">
-              <Typography component="h3" className="text-2xl font-bold mb-4">
-                {formActionLabel[formAction]}
-              </Typography>
-              <Box>
-                <StaffForm />
-              </Box>
+            <Typography component="h4" className="!text-xl !font-bold my-4">
+              {formActionLabel[formAction]}
+            </Typography>
+            <Box className="flex justify-center items-center">
+              <StaffForm />
             </Box>
           </Box>
         </Box>

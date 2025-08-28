@@ -2,7 +2,7 @@ import { Alert, Box, Button, Grid, MenuItem, Snackbar, TextField, Typography } f
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import { Controller } from "react-hook-form";
 import { useStaffForm } from "../hooks/useStaffForm";
-import { useCallback, useState } from "react";
+import { ChangeEventHandler, useCallback, useState } from "react";
 import { useStaffContext } from "@/context/staff/staff.context";
 import { Staff } from "@/model/Staff";
 import { useGradeLevelContext } from "@/context/gradeLevel/gradeLevel.context";
@@ -12,34 +12,39 @@ import { CountryState } from "@/model/CountryState";
 export function StaffForm() {
   const { updateStaff, createStaff, toggleFlipped, countries, states } = useStaffContext();
   const { gradeLevels } = useGradeLevelContext();
-  const { isValid, control, errors, getValues } = useStaffForm();
+  const { formState, control, reset, trigger, getValues } = useStaffForm();
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [hasError, setHasError] = useState(false);
   const [filteredStates, setFilteredStates] = useState<CountryState[]>(states);
   const [selectedState, setSelectedState] = useState<string>("");
-  const [selectedCountry, setSelectedCountry] = useState<string>("");
   const [gradeValue, setGradeValue] = useState<string>("");
 
   const handleGradeLevelChange = (event: SelectChangeEvent) => {
     setGradeValue(event.target.value);
   }
-  const handleCountryChange = (event: SelectChangeEvent) => {
+  const handleCountryChange = (event: any) => {
     const country = event.target.value;
-    setSelectedCountry(country);
+    setSelectedState("");
     setFilteredStates(states.filter((s) => s.country === country));
   }
-  const handleStateChange = (event: SelectChangeEvent) => {
-    setSelectedState(event.target.value);
+  const handleStateChange = (event: any) => {
+    setSelectedState(event.target.value as string);
   }
   const handleClose = () => {
     setOpen(false);
   };
-  const handleSave = useCallback(() => {
-    if (!isValid) {
+  const handleCancel = () => {
+    reset();
+    toggleFlipped();
+  }
+  const handleSave = useCallback(async () => {
+    await trigger();
+    if (!formState.isValid) {
       setMessage("Please fix the errors in the form.");
       setHasError(true);
       setOpen(true);
+      console.log("form values: ", getValues());
       return;
     } else {
       if (!getValues("id")) {
@@ -53,7 +58,7 @@ export function StaffForm() {
 
   return (
     <Box className="flex flex gap-4 w-full">
-      <Grid container spacing={2} className="w-full">
+      <Grid container spacing={4} className="w-full">
         <Grid size={{xs: 6, md: 4}}>
           <Box className="w-full">
             <Controller
@@ -61,12 +66,14 @@ export function StaffForm() {
               control={control}
               render={({ field }) => (
                 <Box className="w-full flex flex-col gap-2">
-                  <Typography component="p">
+                  <Typography component="p" className="text-left pb-2">
                     Name
                   </Typography>
                   <TextField
                     {...field}
                     label="Name"
+                    error={Boolean(formState.errors.name)}
+                    helperText={formState.errors.name?.message}
                     variant="outlined"
                     fullWidth
                     margin="none"
@@ -82,13 +89,15 @@ export function StaffForm() {
               name="role"
               control={control}
               render={({ field }) => (
-                <Box className="w-full">
-                  <Typography component="p">
+                <Box className="w-full flex flex-col gap-2">
+                  <Typography component="p" className="text-left pb-2">
                     Role
                   </Typography>
                   <TextField
                     {...field}
                     label="Role"
+                    error={Boolean(formState.errors.role)}
+                    helperText={formState.errors.role?.message}
                     variant="outlined"
                     fullWidth
                     margin="none"
@@ -105,12 +114,14 @@ export function StaffForm() {
               control={control}
               render={({ field }) => (
                 <Box className="w-full flex flex-col gap-2">
-                  <Typography component="p">
+                  <Typography component="p" className="text-left pb-2">
                     Department
                   </Typography>
                   <TextField
                     {...field}
                     label="Department"
+                    error={Boolean(formState.errors.department)}
+                    helperText={formState.errors.department?.message}
                     variant="outlined"
                     fullWidth
                     margin="none"
@@ -127,17 +138,18 @@ export function StaffForm() {
               control={control}
               render={({ field }) => (
                 <Box className="w-full flex flex-col gap-2">
-                  <Typography component="p">
+                  <Typography component="p" className="text-left pb-2">
                     Country
                   </Typography>
                   <Select
                     {...field}
-                    label="Country"
-                    variant="outlined"
-                    value={selectedCountry}
-                    onChange={handleCountryChange}
+                    className="text-left"
+                    error={Boolean(formState.errors.country)}
+                    onChange={(e) => {
+                      field.onChange(e);
+                      handleCountryChange(e);
+                    }}
                     fullWidth
-                    margin="none"
                   >
                     <MenuItem disabled value="">
                       <em>None</em>
@@ -160,17 +172,19 @@ export function StaffForm() {
               control={control}
               render={({ field }) => (
                 <Box className="w-full flex flex-col gap-2">
-                  <Typography component="p">
+                  <Typography component="p" className="text-left pb-2">
                     State
                   </Typography>
                   <Select
+                    className="text-left"
                     {...field}
-                    label="State"
-                    variant="outlined"
                     value={selectedState}
-                    onChange={handleStateChange}
+                    error={Boolean(formState.errors.state)}
+                    onChange={(e) => {
+                      field.onChange(e);
+                      handleStateChange(e);
+                    }}
                     fullWidth
-                    margin="none"
                   >
                     <MenuItem disabled value="">
                       <em>None</em>
@@ -193,12 +207,14 @@ export function StaffForm() {
               control={control}
               render={({ field }) => (
                 <Box className="w-full flex flex-col gap-2">
-                  <Typography component="p">
+                  <Typography component="p" className="text-left pb-2">
                     Address
                   </Typography>
                   <TextField
                     {...field}
                     label="Address"
+                    error={Boolean(formState.errors.address)}
+                    helperText={formState.errors.address?.message}
                     variant="outlined"
                     fullWidth
                     margin="none"
@@ -215,17 +231,18 @@ export function StaffForm() {
               control={control}
               render={({ field }) => (
                 <Box className="w-full flex flex-col gap-2">
-                  <Typography component="p">
+                  <Typography component="p" className="text-left pb-2">
                     Grade Level
                   </Typography>
                   <Select
                     {...field}
+                    className="text-left"
                     label="Grade Level"
+                    error={Boolean(formState.errors.gradeLevel)}
                     variant="outlined"
                     value={gradeValue}
                     onChange={handleGradeLevelChange}
                     fullWidth
-                    margin="none"
                   >
                     <MenuItem disabled value="">
                       <em>None</em>
@@ -241,7 +258,7 @@ export function StaffForm() {
         </Grid>
         <Grid size={{xs: 12}}>
           <Box className="flex justify-center items-center gap-8 mt-2">
-            <Button variant="outlined" size="medium" color="error" onClick={() => toggleFlipped()}>Cancel</Button>
+            <Button variant="outlined" size="medium" color="error" onClick={handleCancel}>Cancel</Button>
             <Button variant="contained" size="medium" className="bg-[#1e1e1e]" onClick={handleSave}>Save</Button>
           </Box>
         </Grid>

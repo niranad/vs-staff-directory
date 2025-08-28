@@ -6,7 +6,9 @@ export const useStaffForm = () => {
   const { 
     getValues, 
     control,
-    formState: { isValid, errors }
+    reset,
+    trigger,
+    formState,
   } = useForm({
     resolver: yupResolver(staffSchema),
     defaultValues: {
@@ -17,9 +19,9 @@ export const useStaffForm = () => {
       address: '',
       country: '',
       state: '',
-      gradeLevel: null,
-    }
+      gradeLevel: '',
+    },
   })
 
-  return { isValid, control, errors, getValues }
+  return { control, reset, trigger, formState, getValues }
 }

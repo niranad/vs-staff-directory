@@ -3,7 +3,7 @@ import { Alert, Box, Button, IconButton, Menu, MenuItem, Snackbar, Table, TableB
 import AddIcon from '@mui/icons-material/Add';
 import { useGradeLevelContext } from "@/context/gradeLevel/gradeLevel.context";
 import { GradeLevelForm } from "./forms/GradeLevelForm";
-import { MoreHoriz } from "@mui/icons-material";
+import { HourglassEmptyOutlined, MoreHoriz } from "@mui/icons-material";
 import React, { useCallback, useState } from "react";
 
 type FORM_ACTION = "create" | "update";
@@ -83,6 +83,7 @@ export default function GradeLevelTable() {
             <TableHead>
               <TableRow>
                 {/* Table Headers */}
+                <TableCell>S/N</TableCell>
                 <TableCell>Level</TableCell>
                 <TableCell>Sort</TableCell>
                 <TableCell>Action</TableCell>
@@ -90,8 +91,9 @@ export default function GradeLevelTable() {
             </TableHead>
             <TableBody className="min-h-full shadow-lg">
               {
-                gradeLevels.map((g, i) => (
+                gradeLevels.length > 0 ? gradeLevels.map((g, i) => (
                   <TableRow key={g.id + i} hover onClick={() => toggleLevelFlipped()} style={{ cursor: 'pointer' }}>
+                    <TableCell>{i+1}</TableCell>
                     <TableCell>{g.level}</TableCell>
                     <TableCell>{g.sort}</TableCell>
                     <TableCell>
@@ -115,8 +117,17 @@ export default function GradeLevelTable() {
                         </Menu>
                       </Box>
                     </TableCell>
+                  </TableRow> 
+                )) : (
+                  <TableRow className="w-full">
+                    <TableCell colSpan={4}>
+                      <Box className="w-full h-[250px] flex flex-col justify-center items-center">
+                        <HourglassEmptyOutlined />
+                        <Typography>No data available</Typography>
+                      </Box>
+                    </TableCell>
                   </TableRow>
-                ))
+                )
               }
             </TableBody>
           </Table>
@@ -141,13 +152,11 @@ export default function GradeLevelTable() {
             Back to List
           </Button>
           <Box className="flex flex-col items-center justify-center h-full">
-            <Box className="text-center">
-              <Typography component="h3" className="text-2xl font-bold mb-4">
-                {formActionLabel[formAction]}
-              </Typography>
-              <Box>
-                <GradeLevelForm  />
-              </Box>
+            <Typography component="h4" className="!text-xl !font-bold my-4">
+              {formActionLabel[formAction]}
+            </Typography>
+            <Box className="flex justify-center items-center">
+              <GradeLevelForm  />
             </Box>
           </Box>
         </Box>

@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useReducer } from "react";
+import { createContext, useContext, useEffect, useReducer, useState } from "react";
 import { initialStaffState, staffReducer } from "./staff.reducer";
 import { Staff } from "@/model/Staff";
 import { StaffActionType } from "./staff.action";
@@ -46,7 +46,8 @@ export const StaffProvider: React.FC<{children: React.ReactNode}> = ({ children 
 
   useEffect(() => {
     const abortController = new AbortController();
-    fetch(countriesUrl, { signal: abortController.signal })
+    const signal = abortController.signal;
+    fetch(countriesUrl, { signal })
       .then(res => res.json())
       .then(data => {
         const result: Country[] = data;
@@ -65,10 +66,12 @@ export const StaffProvider: React.FC<{children: React.ReactNode}> = ({ children 
           dispatch({ type: StaffActionType.SET_COUNTRIES, payload: Array.from(countries) })
           dispatch({ type: StaffActionType.SET_STATES, payload: countryStates });
         }
+      }).catch((err) => {
+
       })
 
     return () => {
-      abortController.abort();
+      if (abortController !== null) abortController.abort();
     }
   }, [])
 
