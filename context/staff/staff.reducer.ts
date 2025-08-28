@@ -9,6 +9,7 @@ export interface StaffState {
   states: CountryState[];
   flipped: boolean;
   currentStaff: Staff | null;
+  isEdit: boolean;
 }
 
 export const initialStaffState: StaffState = {
@@ -16,11 +17,17 @@ export const initialStaffState: StaffState = {
   countries: [],
   states: [],
   flipped: false,
-  currentStaff: null
+  currentStaff: null,
+  isEdit: false,
 }
 
 export const staffReducer = (state: any, action: StaffAction) => {
   switch (action.type) {
+    case StaffActionType.FETCH_ALL_STAFF:
+      return {
+        ...state,
+        staff: localStorageClient.getAllStaff(),
+      }
     case StaffActionType.FETCH_STAFF_BY_ID:
       return {
         ...state,

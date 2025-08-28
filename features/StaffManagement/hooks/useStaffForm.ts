@@ -7,6 +7,7 @@ export const useStaffForm = () => {
     getValues, 
     control,
     reset,
+    setValue,
     trigger,
     formState,
   } = useForm({
@@ -23,5 +24,5 @@ export const useStaffForm = () => {
     },
   })
 
-  return { control, reset, trigger, formState, getValues }
+  return { control, formState, reset, trigger, setValue, getValues }
 }

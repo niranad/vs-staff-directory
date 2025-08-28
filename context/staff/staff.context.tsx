@@ -12,6 +12,7 @@ interface StaffContextValue {
   states: CountryState[];
   currentStaff: Staff | null;
   flipped: boolean;
+  isEdit: boolean;
   fetchStaffById: (id: string) => void;
   createStaff: (staff: Staff) => void;
   updateStaff: (staff: Staff) => void;
@@ -67,8 +68,9 @@ export const StaffProvider: React.FC<{children: React.ReactNode}> = ({ children 
           dispatch({ type: StaffActionType.SET_STATES, payload: countryStates });
         }
       }).catch((err) => {
-
+        console.error("Error occurred while fetching countries");
       })
+    dispatch({ type: StaffActionType.FETCH_ALL_STAFF });
 
     return () => {
       if (abortController !== null) abortController.abort();
@@ -80,6 +82,7 @@ export const StaffProvider: React.FC<{children: React.ReactNode}> = ({ children 
     countries: state.countries,
     states: state.states,
     flipped: state.flipped,
+    isEdit: state.isEdit,
     currentStaff: state.currentStaff,
     fetchStaffById,
     createStaff,

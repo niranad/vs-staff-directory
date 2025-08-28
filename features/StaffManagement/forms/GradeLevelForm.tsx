@@ -15,9 +15,9 @@ export function GradeLevelForm() {
   const handleClose = useCallback(() => {
     setOpen(false);
   }, []);
-  const handleSave = useCallback(() => {
-    trigger();
-    if (!formState.isValid) {
+  const handleSave = useCallback(async () => {
+    const isValid = await trigger();
+    if (!isValid) {
       setMessage("Please fix the errors in the form.");
       setHasError(true);
       setOpen(true);
@@ -28,6 +28,9 @@ export function GradeLevelForm() {
       } else {
         updateGradeLevel(getValues() as GradeLevel);
       }
+      reset();
+      setOpen(true);
+      toggleLevelFlipped();
       setMessage("Grade level saved successfully!");
     }
   }, [])

@@ -2,17 +2,16 @@ import { Alert, Box, Button, Grid, MenuItem, Snackbar, TextField, Typography } f
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import { Controller } from "react-hook-form";
 import { useStaffForm } from "../hooks/useStaffForm";
-import { ChangeEventHandler, useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useStaffContext } from "@/context/staff/staff.context";
 import { Staff } from "@/model/Staff";
 import { useGradeLevelContext } from "@/context/gradeLevel/gradeLevel.context";
-import { GradeLevel } from "@/model/GradeLevel";
 import { CountryState } from "@/model/CountryState";
 
 export function StaffForm() {
   const { updateStaff, createStaff, toggleFlipped, countries, states } = useStaffContext();
   const { gradeLevels } = useGradeLevelContext();
-  const { formState, control, reset, trigger, getValues } = useStaffForm();
+  const { formState, control, reset, trigger, setValue, getValues } = useStaffForm();
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [hasError, setHasError] = useState(false);
@@ -39,12 +38,11 @@ export function StaffForm() {
     toggleFlipped();
   }
   const handleSave = useCallback(async () => {
-    await trigger();
-    if (!formState.isValid) {
+    const isValid = await trigger();
+    if (!isValid) {
       setMessage("Please fix the errors in the form.");
       setHasError(true);
       setOpen(true);
-      console.log("form values: ", getValues());
       return;
     } else {
       if (!getValues("id")) {
@@ -52,9 +50,22 @@ export function StaffForm() {
       } else {
         updateStaff(getValues() as Staff);
       }
+      reset();
+      setOpen(true);
+      toggleFlipped();
       setMessage("Staff member saved successfully!");
     }
   }, [])
+
+  useEffect(() => {
+    const formValues = getValues();
+    setValue("name", formValues["name"], { shouldDirty: true});
+    setValue("address", formValues["address"]);
+    setValue("country", formValues["country"]);
+    setValue("state", formValues["state"]);
+    setValue("department", formValues["department"]);
+    setValue("role", formValues["role"]);
+  }, [getValues, setValue])
 
   return (
     <Box className="flex flex gap-4 w-full">
@@ -72,6 +83,7 @@ export function StaffForm() {
                   <TextField
                     {...field}
                     label="Name"
+                    value={field.value}
                     error={Boolean(formState.errors.name)}
                     helperText={formState.errors.name?.message}
                     variant="outlined"
@@ -96,6 +108,7 @@ export function StaffForm() {
                   <TextField
                     {...field}
                     label="Role"
+                    value={field.value}
                     error={Boolean(formState.errors.role)}
                     helperText={formState.errors.role?.message}
                     variant="outlined"
@@ -120,6 +133,7 @@ export function StaffForm() {
                   <TextField
                     {...field}
                     label="Department"
+                    value={field.value}
                     error={Boolean(formState.errors.department)}
                     helperText={formState.errors.department?.message}
                     variant="outlined"
@@ -144,6 +158,7 @@ export function StaffForm() {
                   <Select
                     {...field}
                     className="text-left"
+                    value={field.value}
                     error={Boolean(formState.errors.country)}
                     onChange={(e) => {
                       field.onChange(e);
@@ -213,6 +228,7 @@ export function StaffForm() {
                   <TextField
                     {...field}
                     label="Address"
+                    value={field.value}
                     error={Boolean(formState.errors.address)}
                     helperText={formState.errors.address?.message}
                     variant="outlined"
@@ -241,7 +257,10 @@ export function StaffForm() {
                     error={Boolean(formState.errors.gradeLevel)}
                     variant="outlined"
                     value={gradeValue}
-                    onChange={handleGradeLevelChange}
+                    onChange={(e) => {
+                      field.onChange(e);
+                      handleGradeLevelChange(e);
+                    }}
                     fullWidth
                   >
                     <MenuItem disabled value="">

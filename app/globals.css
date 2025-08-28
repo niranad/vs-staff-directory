@@ -29,6 +29,10 @@ html {
   box-sizing: border-box;
 }
 
+.MuiTableCell-root {
+  @apply text-lg;
+}
+
 ::-webkit-scrollbar {
   width: 8px;
 }

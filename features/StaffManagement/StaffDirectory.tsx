@@ -27,7 +27,7 @@ function CustomTabPanel(props: TabPanelProps) {
       aria-labelledby={`directory-tab-${index}`}
       {...other}
     >
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+      {value === index && <Box sx={{ p: 2 }}>{children}</Box>}
     </div>
   );
 }
@@ -61,14 +61,14 @@ export default function StaffDirectory() {
         </Box>
         <Box className="w-full overflow-none mt-[-50px] px-12">
           <Box className="bg-white shadow-lg rounded-tr-[28px] rounded-tl-[28px] p-8 z-50 min-h-screen">
-            <Typography variant="h5" className="text-gray-700 mt-4">
+            <Typography variant="h5" className="text-gray-500 my-4 mb-8">
               Manage and view your organization's staff information with ease.
             </Typography>
  
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-              <Tabs value={value} onChange={handleChange} aria-label="staff directory tabs">
-                <Tab label="Staff Directory" {...a11yProps(0)} />
-                <Tab label="Grade Level" {...a11yProps(1)} />
+              <Tabs value={value} onChange={handleChange} aria-label="staff directory tabs" className="mt-4">
+                <Tab label="Staff Directory" {...a11yProps(0)} className="!text-lg" />
+                <Tab label="Grade Level" {...a11yProps(1)} className="!text-lg" />
               </Tabs>
             </Box>
 

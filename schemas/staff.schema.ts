@@ -1,6 +1,6 @@
 import * as yup from 'yup';
 
-export const staffSchema = yup.object({
+export const staffSchema = yup.object().shape({
   id: yup.string().optional(),
   name: yup.string().min(3).required("Name is required"),
   role: yup.string().required("Position is required"),

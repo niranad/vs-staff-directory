@@ -4,6 +4,8 @@ import { StaffForm } from "./forms/StaffForm";
 import { useStaffContext } from "@/context/staff/staff.context";
 import { HourglassEmptyOutlined, MoreHoriz } from "@mui/icons-material";
 import { useMemo, useState } from "react";
+import { useStaffForm } from "./hooks/useStaffForm";
+import { Staff } from "@/model/Staff";
 
 
 type FORM_ACTION = "create" | "update";
@@ -14,6 +16,7 @@ const formActionLabel: Record<FORM_ACTION, string> = {
 
 export default function StaffDirectoryTable() {
   const { staff, flipped, deleteStaff, toggleFlipped } = useStaffContext();
+  const { reset } = useStaffForm();
   const [formAction, setFormAction] = useState<FORM_ACTION>("create");
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [openSnackBar, setOpenSnackBar] = useState(false);
@@ -29,8 +32,10 @@ export default function StaffDirectoryTable() {
   const handleMenuClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(e.currentTarget);
   }
-  const handleEdit = () => {
+  const handleView = (row: Staff) => {}
+  const handleEdit = (row: Staff) => {
     setFormAction("update");
+    reset(row);
     handleMenuClose();
     toggleFlipped();
   }
@@ -52,7 +57,7 @@ export default function StaffDirectoryTable() {
     width: '100%',
     position: 'relative',
     transformStyle: 'preserve-3d',
-    transition: 'transform 0.8s',
+    transition: 'transform 0.4s',
     transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
   }), [flipped])
   const containerCss = useMemo(() => ({
@@ -77,11 +82,11 @@ export default function StaffDirectoryTable() {
             </Button>
           </Box>
 
-          <Table className="shadow-lg min-h-full" aria-label="staff table">
+          <Table className="shadow-lg min-h-full !text-lg" aria-label="staff table">
             <TableHead>
               <TableRow>
                 {/* Table Headers */}
-                <TableCell>S/N</TableCell>
+                <TableCell className="!text-lg">S/N</TableCell>
                 <TableCell>Name</TableCell>
                 <TableCell>Department</TableCell>
                 <TableCell>Role</TableCell>
@@ -95,7 +100,7 @@ export default function StaffDirectoryTable() {
             <TableBody className="min-h-full shadow-lg">
               {
                 staff.length > 0 ? staff.map((s, i) => (
-                  <TableRow key={s.id + i} hover onClick={() => toggleFlipped()} style={{ cursor: 'pointer' }}>
+                  <TableRow key={s.id + i}>
                     <TableCell>{i+1}</TableCell>
                     <TableCell>{s.name}</TableCell>
                     <TableCell>{s.department}</TableCell>
@@ -109,22 +114,23 @@ export default function StaffDirectoryTable() {
                         <IconButton onClick={handleMenuClick}>
                           <MoreHoriz />
                         </IconButton>
-                        <Menu
-                          id="grade-level-action-menu"
-                          anchorEl={anchorEl}
-                          open={open}
-                          onClose={handleMenuClose}
-                          slotProps={{
-                            list: {
-                              'aria-labelledby': 'gradelevel-actions',
-                            },
-                          }}
-                        >
-                          <MenuItem onClick={handleEdit}>Edit</MenuItem>
-                          <MenuItem onClick={() => handleDelete(s.id)}>Delete</MenuItem>
-                        </Menu>
                       </Box>
                     </TableCell>
+                    <Menu
+                      id="grade-level-action-menu"
+                      anchorEl={anchorEl}
+                      open={open}
+                      onClose={handleMenuClose}
+                      slotProps={{
+                        list: {
+                          'aria-labelledby': 'gradelevel-actions',
+                        },
+                      }}
+                    >
+                      <MenuItem onClick={() => handleView(s)} className="!text-lg">View</MenuItem>
+                      <MenuItem onClick={() => handleEdit(s)} className="!text-lg">Edit</MenuItem>
+                      <MenuItem onClick={() => handleDelete(s.id)} className="!text-lg">Delete</MenuItem>
+                    </Menu>
                   </TableRow>
                 )) : (
                   <TableRow>

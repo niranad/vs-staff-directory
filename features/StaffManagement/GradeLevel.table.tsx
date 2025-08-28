@@ -5,6 +5,8 @@ import { useGradeLevelContext } from "@/context/gradeLevel/gradeLevel.context";
 import { GradeLevelForm } from "./forms/GradeLevelForm";
 import { HourglassEmptyOutlined, MoreHoriz } from "@mui/icons-material";
 import React, { useCallback, useState } from "react";
+import { useGradeLevelForm } from "./hooks/useGradeLevelForm";
+import { GradeLevel } from "@/model/GradeLevel";
 
 type FORM_ACTION = "create" | "update";
 const formActionLabel: Record<FORM_ACTION, string> = {
@@ -14,6 +16,7 @@ const formActionLabel: Record<FORM_ACTION, string> = {
 
 export default function GradeLevelTable() {
   const { levelFlipped, toggleLevelFlipped, gradeLevels, deleteGradeLevel } = useGradeLevelContext();
+  const { reset } = useGradeLevelForm();
   const [formAction, setFormAction] = useState<FORM_ACTION>("create");
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [openSnackBar, setOpenSnackBar] = useState(false);
@@ -29,8 +32,10 @@ export default function GradeLevelTable() {
   const handleClose = () => {
     setOpenSnackBar(false);
   }
-  const handleEdit = () => {
+  const handleView = (row: GradeLevel) => {}
+  const handleEdit = (row: any) => {
     setFormAction("update");
+    reset(row);
     handleMenuClose();
     toggleLevelFlipped();
   }
@@ -55,7 +60,7 @@ export default function GradeLevelTable() {
         width: '100%',
         position: 'relative',
         transformStyle: 'preserve-3d',
-        transition: 'transform 0.8s',
+        transition: 'transform 0.4s',
         transform: levelFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
       }}>
         {/* Front Side - Staff Table */}
@@ -79,7 +84,7 @@ export default function GradeLevelTable() {
             </Button>
           </Box>
 
-          <Table className="shadow-lg min-h-full" aria-label="staff table">
+          <Table className="shadow-lg min-h-full !text-lg" aria-label="staff table">
             <TableHead>
               <TableRow>
                 {/* Table Headers */}
@@ -92,31 +97,30 @@ export default function GradeLevelTable() {
             <TableBody className="min-h-full shadow-lg">
               {
                 gradeLevels.length > 0 ? gradeLevels.map((g, i) => (
-                  <TableRow key={g.id + i} hover onClick={() => toggleLevelFlipped()} style={{ cursor: 'pointer' }}>
+                  <TableRow key={g.id + i}>
                     <TableCell>{i+1}</TableCell>
                     <TableCell>{g.level}</TableCell>
                     <TableCell>{g.sort}</TableCell>
                     <TableCell>
-                      <Box>
-                        <IconButton onClick={handleMenuClick}>
-                          <MoreHoriz />
-                        </IconButton>
-                        <Menu
-                          id="grade-level-action-menu"
-                          anchorEl={anchorEl}
-                          open={open}
-                          onClose={handleMenuClose}
-                          slotProps={{
-                            list: {
-                              'aria-labelledby': 'gradelevel-actions',
-                            },
-                          }}
-                        >
-                          <MenuItem onClick={handleEdit}>Edit</MenuItem>
-                          <MenuItem onClick={() => handleDelete(g.id)}>Delete</MenuItem>
-                        </Menu>
-                      </Box>
+                      <IconButton onClick={handleMenuClick}>
+                        <MoreHoriz />
+                      </IconButton>
                     </TableCell>
+                    <Menu
+                      id="grade-level-action-menu"
+                      anchorEl={anchorEl}
+                      open={open}
+                      onClose={handleMenuClose}
+                      slotProps={{
+                        list: {
+                          'aria-labelledby': 'gradelevel-actions',
+                        },
+                      }}
+                    >
+                      <MenuItem onClick={() => handleView} className="!text-lg">View</MenuItem>
+                      <MenuItem onClick={() => handleEdit(g)} className="!text-lg">Edit</MenuItem>
+                      <MenuItem onClick={() => handleDelete(g.id)} className="!text-lg">Delete</MenuItem>
+                    </Menu>
                   </TableRow> 
                 )) : (
                   <TableRow className="w-full">

@@ -3,7 +3,7 @@ import { yupResolver } from "@hookform/resolvers/yup"
 import { useForm } from "react-hook-form"
 
 export const useGradeLevelForm = () => {
-  const { control, getValues, reset, trigger, formState } = useForm({
+  const { control, getValues, reset, trigger, setValue, formState } = useForm({
     resolver: yupResolver(gradeLevelSchema),
     defaultValues: {
       id: '',
@@ -13,5 +13,5 @@ export const useGradeLevelForm = () => {
     mode: 'onChange'
   })
 
-  return { control, formState, reset, trigger, getValues }
+  return { control, formState, reset, trigger, setValue, getValues }
 }
