@@ -6,19 +6,20 @@ import { HourglassEmptyOutlined, MoreHoriz } from "@mui/icons-material";
 import { useMemo, useState } from "react";
 import { useStaffForm } from "./hooks/useStaffForm";
 import { Staff } from "@/model/Staff";
+import { FlippedSideState } from "@/context/staff/staff.reducer";
 
 
-type FORM_ACTION = "create" | "update";
-const formActionLabel: Record<FORM_ACTION, string> = {
+const flippedSideStateTitle: Record<FlippedSideState, string> = {
   create: "Add New Staff",
-  update: "Edit Staff",
+  edit: "Edit Staff",
+  view: "View Staff",
 }
 
 export default function StaffDirectoryTable() {
-  const { staff, flipped, deleteStaff, toggleFlipped } = useStaffContext();
-  const { reset } = useStaffForm();
-  const [formAction, setFormAction] = useState<FORM_ACTION>("create");
+  const { staff, flipped, deleteStaff, toggleFlipped, flippedSideState, setFlippedSideState } = useStaffContext();
+  const { reset, getValues } = useStaffForm();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [selectedRow, setSelectedRow] = useState<Staff | null>(null);
   const [openSnackBar, setOpenSnackBar] = useState(false);
   const [message, setMessage] = useState("");
   const open = Boolean(anchorEl);
@@ -28,19 +29,33 @@ export default function StaffDirectoryTable() {
   }
   const handleMenuClose = () => {
     setAnchorEl(null);
+    setSelectedRow(null);
   }
-  const handleMenuClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+
+  const handleMenuOpen = (e: React.MouseEvent<HTMLButtonElement>, row: Staff) => {
     setAnchorEl(e.currentTarget);
+    setSelectedRow(row);
   }
-  const handleView = (row: Staff) => {}
-  const handleEdit = (row: Staff) => {
-    setFormAction("update");
-    reset(row);
+
+  const handleAdd = () => {
+    setFlippedSideState("create");
+    toggleFlipped();
+  }
+
+  const handleView = () => {
+    setFlippedSideState("view");
+  }
+  
+  const handleEdit = () => {
+    setFlippedSideState("edit");
+    reset(selectedRow!);
+    console.log("populated values: ", selectedRow, " actual values: ", getValues());
     handleMenuClose();
     toggleFlipped();
   }
-  const handleDelete = (id: string) => {
-    deleteStaff(id);
+
+  const handleDelete = () => {
+    deleteStaff(selectedRow!.id);
     setMessage("Staff deleted successfully!");
     handleMenuClose();
   }
@@ -75,18 +90,18 @@ export default function StaffDirectoryTable() {
             <Button 
               variant="outlined" 
               className="border-2 border-black rounded-md text-black" 
-              onClick={() => toggleFlipped()}
+              onClick={handleAdd}
               startIcon={<AddIcon />}
             >  
               Add Staff
             </Button>
           </Box>
 
-          <Table className="shadow-lg min-h-full !text-lg" aria-label="staff table">
+          <Table className="shadow-md" aria-label="staff table">
             <TableHead>
               <TableRow>
                 {/* Table Headers */}
-                <TableCell className="!text-lg">S/N</TableCell>
+                <TableCell>S/N</TableCell>
                 <TableCell>Name</TableCell>
                 <TableCell>Department</TableCell>
                 <TableCell>Role</TableCell>
@@ -111,33 +126,20 @@ export default function StaffDirectoryTable() {
                     <TableCell>{s.gradeLevel ? s.gradeLevel : 'N/A'}</TableCell>
                     <TableCell>
                       <Box>
-                        <IconButton onClick={handleMenuClick}>
+                        <IconButton onClick={(e) => {
+                          handleMenuOpen(e, s)
+                        }}>
                           <MoreHoriz />
                         </IconButton>
                       </Box>
                     </TableCell>
-                    <Menu
-                      id="grade-level-action-menu"
-                      anchorEl={anchorEl}
-                      open={open}
-                      onClose={handleMenuClose}
-                      slotProps={{
-                        list: {
-                          'aria-labelledby': 'gradelevel-actions',
-                        },
-                      }}
-                    >
-                      <MenuItem onClick={() => handleView(s)} className="!text-lg">View</MenuItem>
-                      <MenuItem onClick={() => handleEdit(s)} className="!text-lg">Edit</MenuItem>
-                      <MenuItem onClick={() => handleDelete(s.id)} className="!text-lg">Delete</MenuItem>
-                    </Menu>
                   </TableRow>
                 )) : (
                   <TableRow>
                     <TableCell colSpan={9}>
                       <Box className="w-full h-[250px] flex flex-col justify-center items-center">
                         <HourglassEmptyOutlined />
-                        <Typography>No data available</Typography>
+                        <Typography component="h5">No data available</Typography>
                       </Box>
                     </TableCell>
                   </TableRow>
@@ -145,6 +147,22 @@ export default function StaffDirectoryTable() {
               }
             </TableBody>
           </Table>
+
+          <Menu
+            id="grade-level-action-menu"
+            anchorEl={anchorEl}
+            open={open}
+            onClose={handleMenuClose}
+            slotProps={{
+              list: {
+                'aria-labelledby': 'gradelevel-actions',
+              },
+            }}
+          >
+            <MenuItem onClick={handleView} className="!text-lg">View</MenuItem>
+            <MenuItem onClick={handleEdit} className="!text-lg !text-blue-500">Edit</MenuItem>
+            <MenuItem onClick={handleDelete} className="!text-lg !text-red-500">Delete</MenuItem>
+          </Menu>
         </Box>
 
         {/* Back Side */}
@@ -167,7 +185,7 @@ export default function StaffDirectoryTable() {
           </Button>
           <Box className="flex flex-col items-center justify-center h-full">
             <Typography component="h4" className="!text-xl !font-bold my-4">
-              {formActionLabel[formAction]}
+              {flippedSideStateTitle[flippedSideState]}
             </Typography>
             <Box className="flex justify-center items-center">
               <StaffForm />

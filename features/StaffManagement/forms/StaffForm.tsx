@@ -58,13 +58,13 @@ export function StaffForm() {
   }, [])
 
   useEffect(() => {
-    const formValues = getValues();
-    setValue("name", formValues["name"], { shouldDirty: true});
-    setValue("address", formValues["address"]);
-    setValue("country", formValues["country"]);
-    setValue("state", formValues["state"]);
-    setValue("department", formValues["department"]);
-    setValue("role", formValues["role"]);
+    // const formValues = getValues();
+    // setValue("name", formValues["name"], { shouldDirty: true});
+    // setValue("address", formValues["address"]);
+    // setValue("country", formValues["country"]);
+    // setValue("state", formValues["state"]);
+    // setValue("department", formValues["department"]);
+    // setValue("role", formValues["role"]);
   }, [getValues, setValue])
 
   return (
@@ -83,7 +83,6 @@ export function StaffForm() {
                   <TextField
                     {...field}
                     label="Name"
-                    value={field.value}
                     error={Boolean(formState.errors.name)}
                     helperText={formState.errors.name?.message}
                     variant="outlined"
@@ -108,7 +107,6 @@ export function StaffForm() {
                   <TextField
                     {...field}
                     label="Role"
-                    value={field.value}
                     error={Boolean(formState.errors.role)}
                     helperText={formState.errors.role?.message}
                     variant="outlined"
@@ -133,7 +131,6 @@ export function StaffForm() {
                   <TextField
                     {...field}
                     label="Department"
-                    value={field.value}
                     error={Boolean(formState.errors.department)}
                     helperText={formState.errors.department?.message}
                     variant="outlined"
@@ -158,7 +155,6 @@ export function StaffForm() {
                   <Select
                     {...field}
                     className="text-left"
-                    value={field.value}
                     error={Boolean(formState.errors.country)}
                     onChange={(e) => {
                       field.onChange(e);
@@ -228,7 +224,6 @@ export function StaffForm() {
                   <TextField
                     {...field}
                     label="Address"
-                    value={field.value}
                     error={Boolean(formState.errors.address)}
                     helperText={formState.errors.address?.message}
                     variant="outlined"

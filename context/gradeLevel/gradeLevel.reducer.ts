@@ -1,17 +1,20 @@
 import { localStorageClient } from "@/shared/lib/client";
 import { GradeLevelAction, GradeLevelActionType } from "./gradeLevel.action";
 import { GradeLevel } from "@/model/GradeLevel";
+import { FlippedSideState } from "../staff/staff.reducer";
 
 export interface GradeLevelState {
   gradeLevels: GradeLevel[];
   currentGradeLevel: GradeLevel | null;
   levelFlipped: boolean;
+  flippedSideState: FlippedSideState;
 }
 
 export const initialGradeLevelState: GradeLevelState = {
   gradeLevels: [],
   currentGradeLevel: null,
   levelFlipped: false,
+  flippedSideState: "create",
 };
 
 export const gradeLevelReducer = (state: any, action: GradeLevelAction) => {
@@ -48,6 +51,11 @@ export const gradeLevelReducer = (state: any, action: GradeLevelAction) => {
       return {
         ...state,
         levelFlipped: !state.levelFlipped
+      }
+    case GradeLevelActionType.SET_FLIPPED_SIDE_STATE:
+      return {
+        ...state,
+        flippedSideState: action.payload
       }
     default:
       return state;

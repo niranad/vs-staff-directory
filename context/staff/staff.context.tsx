@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useReducer, useState } from "react";
+import { createContext, useContext, useEffect, useReducer } from "react";
 import { initialStaffState, staffReducer } from "./staff.reducer";
 import { Staff } from "@/model/Staff";
 import { StaffActionType } from "./staff.action";
@@ -12,12 +12,13 @@ interface StaffContextValue {
   states: CountryState[];
   currentStaff: Staff | null;
   flipped: boolean;
-  isEdit: boolean;
+  flippedSideState: "create" | "view" | "edit";
   fetchStaffById: (id: string) => void;
   createStaff: (staff: Staff) => void;
   updateStaff: (staff: Staff) => void;
   deleteStaff: (id: string) => void;
   toggleFlipped: () => void;
+  setFlippedSideState: (state: string) => void;
 }
 
 const StaffContext = createContext<StaffContextValue | null>(null);
@@ -45,6 +46,10 @@ export const StaffProvider: React.FC<{children: React.ReactNode}> = ({ children 
     dispatch({ type: StaffActionType.TOGGLE_FLIPPED });
   }
 
+  const setFlippedSideState = (payload: string) => {
+    dispatch({ type: StaffActionType.SET_FLIPPED_SIDE_STATE, payload });
+  }
+
   useEffect(() => {
     const abortController = new AbortController();
     const signal = abortController.signal;
@@ -68,7 +73,7 @@ export const StaffProvider: React.FC<{children: React.ReactNode}> = ({ children 
           dispatch({ type: StaffActionType.SET_STATES, payload: countryStates });
         }
       }).catch((err) => {
-        console.error("Error occurred while fetching countries");
+        console.error("Error while fetching countries: ", err);
       })
     dispatch({ type: StaffActionType.FETCH_ALL_STAFF });
 
@@ -82,13 +87,14 @@ export const StaffProvider: React.FC<{children: React.ReactNode}> = ({ children 
     countries: state.countries,
     states: state.states,
     flipped: state.flipped,
-    isEdit: state.isEdit,
+    flippedSideState: state.flippedSideState,
     currentStaff: state.currentStaff,
     fetchStaffById,
     createStaff,
     updateStaff,
     deleteStaff,
     toggleFlipped,
+    setFlippedSideState
   };
 
   return (

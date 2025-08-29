@@ -1,17 +1,20 @@
 import { GradeLevel } from "@/model/GradeLevel";
-import { createContext, useContext, useReducer } from "react";
+import { createContext, useContext, useEffect, useReducer } from "react";
 import { gradeLevelReducer, initialGradeLevelState } from "./gradeLevel.reducer";
 import { GradeLevelActionType } from "./gradeLevel.action";
+import { FlippedSideState } from "../staff/staff.reducer";
 
 export interface GradeLevelContextType {
   gradeLevels: GradeLevel[];
   levelFlipped: boolean;
+  flippedSideState: FlippedSideState;
   fetchGradeLevels: () => void;
   fetchGradeLevelById: (id: string) => void;
   createGradeLevel: (gradeLevel: GradeLevel) => void;
   updateGradeLevel: (gradeLevel: GradeLevel) => void;
   deleteGradeLevel: (id: string) => void;
   toggleLevelFlipped: () => void;
+  setFlippedSideState: (state: string) => void;
 }
 
 export const GradeLevelContext = createContext<GradeLevelContextType | null>(null);
@@ -36,17 +39,26 @@ export const GradeLevelProvider = ({ children }: { children: React.ReactNode }) 
   const toggleLevelFlipped = () => {
     dispatch({ type: GradeLevelActionType.TOGGLE_LEVEL_FLIPPED });
   };
+  const setFlippedSideState = (payload: string) => {
+    dispatch({ type: GradeLevelActionType.SET_FLIPPED_SIDE_STATE, payload });
+  }
 
   const contextValue: GradeLevelContextType = {
     gradeLevels: state.gradeLevels,
     levelFlipped: state.levelFlipped,
+    flippedSideState: state.flippedSideState,
     fetchGradeLevels,
     fetchGradeLevelById,
     createGradeLevel,
     updateGradeLevel,
     deleteGradeLevel,
-    toggleLevelFlipped
+    toggleLevelFlipped,
+    setFlippedSideState
   }
+
+  useEffect(() => {
+    fetchGradeLevels();
+  }, [])
 
   return (
     <GradeLevelContext.Provider value={contextValue}>

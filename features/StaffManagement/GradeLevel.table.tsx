@@ -4,27 +4,30 @@ import AddIcon from '@mui/icons-material/Add';
 import { useGradeLevelContext } from "@/context/gradeLevel/gradeLevel.context";
 import { GradeLevelForm } from "./forms/GradeLevelForm";
 import { HourglassEmptyOutlined, MoreHoriz } from "@mui/icons-material";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { useGradeLevelForm } from "./hooks/useGradeLevelForm";
 import { GradeLevel } from "@/model/GradeLevel";
+import { FlippedSideState } from "@/context/staff/staff.reducer";
 
-type FORM_ACTION = "create" | "update";
-const formActionLabel: Record<FORM_ACTION, string> = {
+
+const flippedSideStateTitle: Record<FlippedSideState, string> = {
   create: "Add New Grade Level",
-  update: "Edit Grade Level",
+  edit: "Edit Grade Level",
+  view: "View Grade Level",
 }
 
 export default function GradeLevelTable() {
-  const { levelFlipped, toggleLevelFlipped, gradeLevels, deleteGradeLevel } = useGradeLevelContext();
+  const { levelFlipped, toggleLevelFlipped, flippedSideState, setFlippedSideState, gradeLevels, deleteGradeLevel } = useGradeLevelContext();
   const { reset } = useGradeLevelForm();
-  const [formAction, setFormAction] = useState<FORM_ACTION>("create");
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [openSnackBar, setOpenSnackBar] = useState(false);
+  const [selectedRow, setSelectedRow] = useState<GradeLevel | null>(null);
   const [message, setMessage] = useState("");
   const open = Boolean(anchorEl);
 
-  const handleMenuClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleMenuOpen = (e: React.MouseEvent<HTMLButtonElement>, row: GradeLevel) => {
     setAnchorEl(e.currentTarget);
+    setSelectedRow(row);
   }
   const handleMenuClose = () => {
     setAnchorEl(null);
@@ -32,46 +35,59 @@ export default function GradeLevelTable() {
   const handleClose = () => {
     setOpenSnackBar(false);
   }
-  const handleView = (row: GradeLevel) => {}
-  const handleEdit = (row: any) => {
-    setFormAction("update");
-    reset(row);
+  const handleView = () => {
+    setFlippedSideState("view");
+  }
+
+  const handleEdit = () => {
+    setFlippedSideState("edit");
+    reset(selectedRow!);
     handleMenuClose();
     toggleLevelFlipped();
   }
-  const handleDelete = (id: string) => {
-    deleteGradeLevel(id);
+  const handleDelete = () => {
+    deleteGradeLevel(selectedRow!.id);
     handleMenuClose();
   }
 
   const handleAddGradeLevel = useCallback(() => {
-    setFormAction("create");
+    setFlippedSideState("create");
     toggleLevelFlipped();
   }, [])
 
+  const containerSx = useMemo(() => (
+    {
+      perspective: '1000px',
+      width: '100%',
+    }
+  ), [])
+
+  const flipContainerSx = useMemo(() => (
+    {
+      width: '100%',
+      position: 'relative',
+      transformStyle: 'preserve-3d',
+      transition: 'transform 0.4s',
+      transform: levelFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
+    }
+  ), [levelFlipped])
+
+  const frontSideSx = useMemo(() => (
+    {
+      position: 'absolute',
+      width: '100%',
+      backfaceVisibility: 'hidden',
+      bgcolor: 'white',
+      borderRadius: 2,
+      p: 2,
+    }
+  ), [])
+
   return (
-    <Box
-      sx={{
-        perspective: '1000px',
-        width: '100%',
-      }}
-    >
-      <Box sx={{
-        width: '100%',
-        position: 'relative',
-        transformStyle: 'preserve-3d',
-        transition: 'transform 0.4s',
-        transform: levelFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
-      }}>
+    <Box sx={containerSx}>
+      <Box sx={flipContainerSx}>
         {/* Front Side - Staff Table */}
-        <Box sx={{
-          position: 'absolute',
-          width: '100%',
-          backfaceVisibility: 'hidden',
-          bgcolor: 'white',
-          borderRadius: 2,
-          p: 2,
-        }}>
+        <Box sx={frontSideSx}>
           <Box className="flex items-center justify-between mt-4 mb-2">
             <Button></Button>
             <Button 
@@ -84,7 +100,7 @@ export default function GradeLevelTable() {
             </Button>
           </Box>
 
-          <Table className="shadow-lg min-h-full !text-lg" aria-label="staff table">
+          <Table className="shadow-md" aria-label="staff table">
             <TableHead>
               <TableRow>
                 {/* Table Headers */}
@@ -102,32 +118,20 @@ export default function GradeLevelTable() {
                     <TableCell>{g.level}</TableCell>
                     <TableCell>{g.sort}</TableCell>
                     <TableCell>
-                      <IconButton onClick={handleMenuClick}>
+                      <IconButton onClick={(e) => {
+                        handleMenuOpen(e, g)
+                      }}
+                      >
                         <MoreHoriz />
                       </IconButton>
                     </TableCell>
-                    <Menu
-                      id="grade-level-action-menu"
-                      anchorEl={anchorEl}
-                      open={open}
-                      onClose={handleMenuClose}
-                      slotProps={{
-                        list: {
-                          'aria-labelledby': 'gradelevel-actions',
-                        },
-                      }}
-                    >
-                      <MenuItem onClick={() => handleView} className="!text-lg">View</MenuItem>
-                      <MenuItem onClick={() => handleEdit(g)} className="!text-lg">Edit</MenuItem>
-                      <MenuItem onClick={() => handleDelete(g.id)} className="!text-lg">Delete</MenuItem>
-                    </Menu>
                   </TableRow> 
                 )) : (
                   <TableRow className="w-full">
                     <TableCell colSpan={4}>
                       <Box className="w-full h-[250px] flex flex-col justify-center items-center">
                         <HourglassEmptyOutlined />
-                        <Typography>No data available</Typography>
+                        <Typography variant="h5" className="!text-lg">No data available</Typography>
                       </Box>
                     </TableCell>
                   </TableRow>
@@ -135,6 +139,22 @@ export default function GradeLevelTable() {
               }
             </TableBody>
           </Table>
+
+          <Menu
+            id="grade-level-action-menu"
+            anchorEl={anchorEl}
+            open={open}
+            onClose={handleMenuClose}
+            slotProps={{
+              list: {
+                'aria-labelledby': 'gradelevel-actions',
+              },
+            }}
+          >
+            <MenuItem onClick={handleView} className="!text-lg">View</MenuItem>
+            <MenuItem onClick={handleEdit} className="!text-lg !text-blue-500">Edit</MenuItem>
+            <MenuItem onClick={handleDelete} className="!text-lg !text-red-500">Delete</MenuItem>
+          </Menu>
         </Box>
 
         {/* Back Side - Form */}
@@ -157,7 +177,7 @@ export default function GradeLevelTable() {
           </Button>
           <Box className="flex flex-col items-center justify-center h-full">
             <Typography component="h4" className="!text-xl !font-bold my-4">
-              {formActionLabel[formAction]}
+              {flippedSideStateTitle[flippedSideState]}
             </Typography>
             <Box className="flex justify-center items-center">
               <GradeLevelForm  />

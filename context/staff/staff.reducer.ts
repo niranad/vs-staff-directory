@@ -3,13 +3,15 @@ import { StaffAction, StaffActionType } from "./staff.action";
 import { localStorageClient } from "@/shared/lib/client";
 import { CountryState } from "@/model/CountryState";
 
+export type FlippedSideState = "create" | "view" | "edit";
+
 export interface StaffState {
   staff: Staff[];
   countries: string[];
   states: CountryState[];
   flipped: boolean;
   currentStaff: Staff | null;
-  isEdit: boolean;
+  flippedSideState: FlippedSideState;
 }
 
 export const initialStaffState: StaffState = {
@@ -18,7 +20,7 @@ export const initialStaffState: StaffState = {
   states: [],
   flipped: false,
   currentStaff: null,
-  isEdit: false,
+  flippedSideState: "create",
 }
 
 export const staffReducer = (state: any, action: StaffAction) => {
@@ -66,6 +68,11 @@ export const staffReducer = (state: any, action: StaffAction) => {
       return {
         ...state,
         states: action.payload
+      }
+    case StaffActionType.SET_FLIPPED_SIDE_STATE:
+      return {
+        ...state,
+        flippedSideState: action.payload
       }
     default:
       return state;
