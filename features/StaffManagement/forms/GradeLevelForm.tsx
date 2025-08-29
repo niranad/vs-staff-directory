@@ -44,6 +44,7 @@ export function GradeLevelForm() {
     }
     if (flippedSideState === "create") {
       const currentGrade = getValues();
+      currentGrade.id = '';
       currentGrade.level = '';
       currentGrade.sort = 0;
       reset(currentGrade);
