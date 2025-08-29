@@ -37,7 +37,7 @@ export const localStorageClient = {
     localStorage.setItem(STAFF_KEY, JSON.stringify(staffList));
   },
   deleteStaff: (id: string) => {
-    let staff = localStorage.getItem(STAFF_KEY);
+    const staff = localStorage.getItem(STAFF_KEY);
     if (staff !== null) {
       let staffList: Staff[] = JSON.parse(staff);
       staffList = staffList.filter(s => s.id !== id);
@@ -45,7 +45,7 @@ export const localStorageClient = {
     }
   },
   getAllGradeLevels: (): GradeLevel[] => {
-    let grades = localStorage.getItem(GRADE_LEVEL_KEY);
+    const grades = localStorage.getItem(GRADE_LEVEL_KEY);
     return grades !== null ? JSON.parse(grades) : [];
   },
   getGradeLevelById: (id: string): GradeLevel | null => {

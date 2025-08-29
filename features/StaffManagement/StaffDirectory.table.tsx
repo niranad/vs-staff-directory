@@ -3,11 +3,12 @@ import AddIcon from '@mui/icons-material/Add';
 import { StaffForm } from "./forms/StaffForm";
 import { useStaffContext } from "@/context/staff/staff.context";
 import { HourglassEmptyOutlined, MoreHoriz } from "@mui/icons-material";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useStaffForm } from "./hooks/useStaffForm";
 import { Staff } from "@/model/Staff";
 import { FlippedSideState } from "@/context/staff/staff.reducer";
 import { useGradeLevelContext } from "@/context/gradeLevel/gradeLevel.context";
+import TableFilter from "@/shared/components/TableFilter";
 
 
 const flippedSideStateTitle: Record<FlippedSideState, string> = {
@@ -15,6 +16,17 @@ const flippedSideStateTitle: Record<FlippedSideState, string> = {
   edit: "Edit Staff",
   view: "View Staff",
 }
+
+type StaffFilterColumn = "name" | "department" | "role" | "country" | "state" | "address"
+const columns = [
+  "name", 
+  "department",
+  "role",
+  "country",
+  "state",
+  "address",
+  "gradeLevel",
+]
 
 export default function StaffDirectoryTable() {
   const { 
@@ -32,6 +44,9 @@ export default function StaffDirectoryTable() {
   const [selectedRow, setSelectedRow] = useState<Staff | null>(null);
   const [openSnackBar, setOpenSnackBar] = useState(false);
   const [message, setMessage] = useState("");
+  const [selectedColumn, setSelectedColumn] = useState<string>("");
+  const [filteredStaff, setFilteredStaff] = useState<Staff[]>([]);
+  const [filterValue, setFilterValue] = useState<string>("");
   const open = Boolean(anchorEl);
 
   const gradeLookup = useMemo(() => {
@@ -75,6 +90,18 @@ export default function StaffDirectoryTable() {
     handleMenuClose();
   }
 
+  const handleColumnChange = (event: any) => {
+    setSelectedColumn(event.target.value);
+  }
+  const handleFilterChange = (event: any) => {
+    const _filterValue = event.target.value?.toLowerCase();
+    setFilterValue(_filterValue);
+    if (Boolean(selectedColumn)) {
+      const key: StaffFilterColumn = selectedColumn as any;
+      setFilteredStaff(staff.filter((s) => ("" + s[key]).toLowerCase().includes(_filterValue)))
+    }
+  }
+
   const frontSideCss = useMemo(() => ({
     position: 'absolute',
     width: '100%',
@@ -95,6 +122,10 @@ export default function StaffDirectoryTable() {
     width: '100%',
   }), [])
 
+  useEffect(() => {
+    setFilteredStaff(staff);
+  }, [staff])
+
   return (
     <Box sx={containerCss}>
       <Box sx={flipContainerCss}>
@@ -111,6 +142,14 @@ export default function StaffDirectoryTable() {
               Add Staff
             </Button>
           </Box>
+
+          <TableFilter
+            columns={columns}
+            filterValue={filterValue}
+            selectedColumn={selectedColumn}
+            onColumnChange={handleColumnChange} 
+            onInputChange={handleFilterChange} 
+          />
 
           <Table className="shadow-md" aria-label="staff table">
             <TableHead>
@@ -129,7 +168,7 @@ export default function StaffDirectoryTable() {
             </TableHead>
             <TableBody className="min-h-full shadow-lg">
               {
-                staff.length > 0 ? staff.map((s, i) => (
+                filteredStaff.length > 0 ? filteredStaff.map((s, i) => (
                   <TableRow key={s.id + i}>
                     <TableCell>{i+1}</TableCell>
                     <TableCell>{s.name}</TableCell>

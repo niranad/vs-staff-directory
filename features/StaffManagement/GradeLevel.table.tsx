@@ -4,11 +4,12 @@ import AddIcon from '@mui/icons-material/Add';
 import { useGradeLevelContext } from "@/context/gradeLevel/gradeLevel.context";
 import { GradeLevelForm } from "./forms/GradeLevelForm";
 import { HourglassEmptyOutlined, MoreHoriz } from "@mui/icons-material";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useGradeLevelForm } from "./hooks/useGradeLevelForm";
 import { GradeLevel } from "@/model/GradeLevel";
 import { FlippedSideState } from "@/context/staff/staff.reducer";
 import { useSnackBarContext } from "@/context/snackbar/snackbar.context";
+import TableFilter from "@/shared/components/TableFilter";
 
 
 const flippedSideStateTitle: Record<FlippedSideState, string> = {
@@ -16,6 +17,9 @@ const flippedSideStateTitle: Record<FlippedSideState, string> = {
   edit: "Edit Grade Level",
   view: "View Grade Level",
 }
+
+type GradeFilterColumn = "level" | "sort";
+const columns: string[] = ['level', 'sort'];
 
 export default function GradeLevelTable() {
   const { 
@@ -31,7 +35,23 @@ export default function GradeLevelTable() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const { openSnackBar } = useSnackBarContext();
   const [selectedRow, setSelectedRow] = useState<GradeLevel | null>(null);
+  const [selectedColumn, setSelectedColumn] = useState("");
+  const [filteredGrades, setFilteredGrades] = useState<GradeLevel[]>(gradeLevels);
+  const [filterValue, setFilterValue] = useState("");
   const open = Boolean(anchorEl);
+
+  const handleColumnChange = (event: any) => {
+    setSelectedColumn(event.target.value);
+  }
+
+  const handleFilterChange = (event: any) => {
+    const _filterValue = event.target.value?.toLowerCase();
+    setFilterValue(_filterValue);
+    if (Boolean(selectedColumn)) {
+      const key: GradeFilterColumn = selectedColumn as any;
+      setFilteredGrades(gradeLevels.filter((g) => ("" + g[key]).toLowerCase().includes(_filterValue)))
+    }
+  }
 
   const handleMenuOpen = (e: React.MouseEvent<HTMLButtonElement>, row: GradeLevel) => {
     setAnchorEl(e.currentTarget);
@@ -93,6 +113,10 @@ export default function GradeLevelTable() {
     }
   ), [])
 
+  useEffect(() => {
+    setFilteredGrades(gradeLevels);
+  }, [gradeLevels])
+
   return (
     <Box sx={containerSx}>
       <Box sx={flipContainerSx}>
@@ -110,6 +134,13 @@ export default function GradeLevelTable() {
             </Button>
           </Box>
 
+          <TableFilter 
+            columns={columns}
+            filterValue={filterValue}
+            selectedColumn={selectedColumn}
+            onColumnChange={handleColumnChange} 
+            onInputChange={handleFilterChange} 
+          />
           <Table className="shadow-md" aria-label="staff table">
             <TableHead>
               <TableRow>
@@ -122,7 +153,7 @@ export default function GradeLevelTable() {
             </TableHead>
             <TableBody className="min-h-full shadow-lg">
               {
-                gradeLevels.length > 0 ? gradeLevels.map((g, i) => (
+                filteredGrades.length > 0 ? filteredGrades.map((g, i) => (
                   <TableRow key={g.id + i}>
                     <TableCell>{i+1}</TableCell>
                     <TableCell>{g.level}</TableCell>

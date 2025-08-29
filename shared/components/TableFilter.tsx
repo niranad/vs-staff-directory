@@ -1,17 +1,19 @@
 
-import React, { useState } from 'react'
+import React, { memo } from 'react'
 import { Box, MenuItem, Select, SelectChangeEvent, TextField } from '@mui/material'
 
 interface TableFilterProps {
   columns: string[];
   selectedColumn: string;
+  filterValue: string;
   onColumnChange: (event: SelectChangeEvent) => void;
   onInputChange: (event: any) => void;
 }
 
-export default function TableFilter({
+function TableFilter({
   columns, 
   selectedColumn,
+  filterValue,
   onColumnChange, 
   onInputChange
 }: TableFilterProps) {
@@ -30,13 +32,14 @@ export default function TableFilter({
           </MenuItem>
           {
             columns.map((c, i) => (
-              <MenuItem key={c + i}>{c}</MenuItem>
+              <MenuItem key={c + i} value={c}>{c}</MenuItem>
             ))
           }
         </Select>
         <TextField
           className="w-[150px]"
           name="Value"
+          value={filterValue}
           placeholder='Filter value'
           onChange={onInputChange}
         />
@@ -44,3 +47,5 @@ export default function TableFilter({
     </Box>
   )
 }
+
+export default memo(TableFilter);
