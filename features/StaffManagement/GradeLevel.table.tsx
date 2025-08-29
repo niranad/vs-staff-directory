@@ -1,5 +1,5 @@
 
-import { Alert, Box, Button, IconButton, Menu, MenuItem, Snackbar, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
+import { Box, Button, IconButton, Menu, MenuItem, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
 import { useGradeLevelContext } from "@/context/gradeLevel/gradeLevel.context";
 import { GradeLevelForm } from "./forms/GradeLevelForm";
@@ -8,6 +8,7 @@ import React, { useCallback, useMemo, useState } from "react";
 import { useGradeLevelForm } from "./hooks/useGradeLevelForm";
 import { GradeLevel } from "@/model/GradeLevel";
 import { FlippedSideState } from "@/context/staff/staff.reducer";
+import { useSnackBarContext } from "@/context/snackbar/snackbar.context";
 
 
 const flippedSideStateTitle: Record<FlippedSideState, string> = {
@@ -17,36 +18,45 @@ const flippedSideStateTitle: Record<FlippedSideState, string> = {
 }
 
 export default function GradeLevelTable() {
-  const { levelFlipped, toggleLevelFlipped, flippedSideState, setFlippedSideState, gradeLevels, deleteGradeLevel } = useGradeLevelContext();
+  const { 
+    levelFlipped, 
+    toggleLevelFlipped, 
+    flippedSideState, 
+    setFlippedSideState, 
+    gradeLevels, 
+    deleteGradeLevel,
+    fetchGradeLevelById,
+  } = useGradeLevelContext();
   const { reset } = useGradeLevelForm();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [openSnackBar, setOpenSnackBar] = useState(false);
+  const { openSnackBar } = useSnackBarContext();
   const [selectedRow, setSelectedRow] = useState<GradeLevel | null>(null);
-  const [message, setMessage] = useState("");
   const open = Boolean(anchorEl);
 
   const handleMenuOpen = (e: React.MouseEvent<HTMLButtonElement>, row: GradeLevel) => {
     setAnchorEl(e.currentTarget);
     setSelectedRow(row);
   }
+
   const handleMenuClose = () => {
     setAnchorEl(null);
   }
-  const handleClose = () => {
-    setOpenSnackBar(false);
-  }
+ 
   const handleView = () => {
     setFlippedSideState("view");
   }
 
   const handleEdit = () => {
     setFlippedSideState("edit");
+    fetchGradeLevelById(selectedRow!.id);
     reset(selectedRow!);
     handleMenuClose();
     toggleLevelFlipped();
   }
+
   const handleDelete = () => {
     deleteGradeLevel(selectedRow!.id);
+    openSnackBar({message: "Grade level deleted successfully!", severity: "success"});
     handleMenuClose();
   }
 
@@ -185,19 +195,6 @@ export default function GradeLevelTable() {
           </Box>
         </Box>
       </Box>
-
-      <Snackbar
-        open={openSnackBar}
-        autoHideDuration={6000}
-        onClose={handleClose}
-      >
-        <Alert
-          onClose={handleClose}
-          severity="success"
-          variant="filled"
-          sx={{ width: '100%' }}
-        >{message}</Alert>
-      </Snackbar>
     </Box>
   )
 }

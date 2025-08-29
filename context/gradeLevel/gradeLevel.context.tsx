@@ -7,6 +7,7 @@ import { FlippedSideState } from "../staff/staff.reducer";
 export interface GradeLevelContextType {
   gradeLevels: GradeLevel[];
   levelFlipped: boolean;
+  currentGradeLevel: GradeLevel | null,
   flippedSideState: FlippedSideState;
   fetchGradeLevels: () => void;
   fetchGradeLevelById: (id: string) => void;
@@ -45,6 +46,7 @@ export const GradeLevelProvider = ({ children }: { children: React.ReactNode }) 
 
   const contextValue: GradeLevelContextType = {
     gradeLevels: state.gradeLevels,
+    currentGradeLevel: state.currentGradeLevel,
     levelFlipped: state.levelFlipped,
     flippedSideState: state.flippedSideState,
     fetchGradeLevels,

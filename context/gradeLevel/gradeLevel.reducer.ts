@@ -32,7 +32,7 @@ export const gradeLevelReducer = (state: any, action: GradeLevelAction) => {
         gradeLevels: localStorageClient.getAllGradeLevels()
       }
     case GradeLevelActionType.DELETE_GRADE_LEVEL:
-      localStorageClient.deleteGradeLevel(action.payload.id);
+      localStorageClient.deleteGradeLevel(action.payload);
       return {
         ...state,
         gradeLevels: localStorageClient.getAllGradeLevels()
@@ -45,7 +45,7 @@ export const gradeLevelReducer = (state: any, action: GradeLevelAction) => {
     case GradeLevelActionType.FETCH_GRADE_LEVEL_BY_ID:
       return {
         ...state,
-        currentGradeLevel: localStorageClient.getGradeLevelById(action.payload.id)
+        currentGradeLevel: localStorageClient.getGradeLevelById(action.payload)
       }
     case GradeLevelActionType.TOGGLE_LEVEL_FLIPPED:
       return {

@@ -1,4 +1,4 @@
-import { Alert, Box, Button, Grid, MenuItem, Snackbar, TextField, Typography } from "@mui/material";
+import { Box, Button, Grid, MenuItem, TextField, Typography } from "@mui/material";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import { Controller } from "react-hook-form";
 import { useStaffForm } from "../hooks/useStaffForm";
@@ -7,14 +7,21 @@ import { useStaffContext } from "@/context/staff/staff.context";
 import { Staff } from "@/model/Staff";
 import { useGradeLevelContext } from "@/context/gradeLevel/gradeLevel.context";
 import { CountryState } from "@/model/CountryState";
+import { useSnackBarContext } from "@/context/snackbar/snackbar.context";
 
 export function StaffForm() {
-  const { updateStaff, createStaff, toggleFlipped, countries, states } = useStaffContext();
+  const { 
+    updateStaff, 
+    createStaff, 
+    toggleFlipped, 
+    flippedSideState, 
+    countries,
+    states,
+    currentStaff,
+  } = useStaffContext();
   const { gradeLevels } = useGradeLevelContext();
-  const { formState, control, reset, trigger, setValue, getValues } = useStaffForm();
-  const [open, setOpen] = useState(false);
-  const [message, setMessage] = useState("");
-  const [hasError, setHasError] = useState(false);
+  const { formState, control, reset, trigger, getValues } = useStaffForm();
+  const { openSnackBar } = useSnackBarContext();
   const [filteredStates, setFilteredStates] = useState<CountryState[]>(states);
   const [selectedState, setSelectedState] = useState<string>("");
   const [gradeValue, setGradeValue] = useState<string>("");
@@ -30,9 +37,7 @@ export function StaffForm() {
   const handleStateChange = (event: any) => {
     setSelectedState(event.target.value as string);
   }
-  const handleClose = () => {
-    setOpen(false);
-  };
+
   const handleCancel = () => {
     reset();
     toggleFlipped();
@@ -40,9 +45,7 @@ export function StaffForm() {
   const handleSave = useCallback(async () => {
     const isValid = await trigger();
     if (!isValid) {
-      setMessage("Please fix the errors in the form.");
-      setHasError(true);
-      setOpen(true);
+      openSnackBar({message: "Please fix the errors in the form.", severity: "error"});
       return;
     } else {
       if (!getValues("id")) {
@@ -51,21 +54,19 @@ export function StaffForm() {
         updateStaff(getValues() as Staff);
       }
       reset();
-      setOpen(true);
+      openSnackBar({message: "Staff member saved successfully!", severity: "success"})
       toggleFlipped();
-      setMessage("Staff member saved successfully!");
     }
   }, [])
 
   useEffect(() => {
-    // const formValues = getValues();
-    // setValue("name", formValues["name"], { shouldDirty: true});
-    // setValue("address", formValues["address"]);
-    // setValue("country", formValues["country"]);
-    // setValue("state", formValues["state"]);
-    // setValue("department", formValues["department"]);
-    // setValue("role", formValues["role"]);
-  }, [getValues, setValue])
+    if (flippedSideState === 'edit' && currentStaff !== null) {
+      reset(currentStaff);
+      setFilteredStates(states.filter((s) => s.country === currentStaff.country));
+      setSelectedState(currentStaff.state);
+      setGradeValue(currentStaff.gradeLevel ?? "");
+    } 
+  }, [flippedSideState, currentStaff])
 
   return (
     <Box className="flex flex gap-4 w-full">
@@ -277,19 +278,6 @@ export function StaffForm() {
           </Box>
         </Grid>
       </Grid>
-
-      <Snackbar
-        open={open}
-        autoHideDuration={6000}
-        onClose={handleClose}
-      >
-        <Alert
-          onClose={handleClose}
-          severity={hasError ? "error" : "success"}
-          variant="filled"
-          sx={{ width: '100%' }}
-        >{message}</Alert>
-      </Snackbar>
     </Box>
   );
 }

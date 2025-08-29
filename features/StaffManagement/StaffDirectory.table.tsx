@@ -7,6 +7,7 @@ import { useMemo, useState } from "react";
 import { useStaffForm } from "./hooks/useStaffForm";
 import { Staff } from "@/model/Staff";
 import { FlippedSideState } from "@/context/staff/staff.reducer";
+import { useGradeLevelContext } from "@/context/gradeLevel/gradeLevel.context";
 
 
 const flippedSideStateTitle: Record<FlippedSideState, string> = {
@@ -16,13 +17,27 @@ const flippedSideStateTitle: Record<FlippedSideState, string> = {
 }
 
 export default function StaffDirectoryTable() {
-  const { staff, flipped, deleteStaff, toggleFlipped, flippedSideState, setFlippedSideState } = useStaffContext();
-  const { reset, getValues } = useStaffForm();
+  const { 
+    staff,
+    flipped, 
+    deleteStaff, 
+    toggleFlipped, 
+    flippedSideState, 
+    setFlippedSideState,
+    fetchStaffById,
+  } = useStaffContext();
+  const { gradeLevels } = useGradeLevelContext();
+  const { reset } = useStaffForm();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedRow, setSelectedRow] = useState<Staff | null>(null);
   const [openSnackBar, setOpenSnackBar] = useState(false);
   const [message, setMessage] = useState("");
   const open = Boolean(anchorEl);
+
+  const gradeLookup = useMemo(() => {
+    const lookup = new Map(gradeLevels.map((g) => [g.id, g.level]));
+    return lookup;
+  }, [gradeLevels]);
 
   const handleClose = () => {
     setOpenSnackBar(false);
@@ -48,8 +63,8 @@ export default function StaffDirectoryTable() {
   
   const handleEdit = () => {
     setFlippedSideState("edit");
+    fetchStaffById(selectedRow!.id);
     reset(selectedRow!);
-    console.log("populated values: ", selectedRow, " actual values: ", getValues());
     handleMenuClose();
     toggleFlipped();
   }
@@ -123,7 +138,7 @@ export default function StaffDirectoryTable() {
                     <TableCell>{s.country}</TableCell>
                     <TableCell>{s.state}</TableCell>
                     <TableCell>{s.address}</TableCell>  
-                    <TableCell>{s.gradeLevel ? s.gradeLevel : 'N/A'}</TableCell>
+                    <TableCell>{s.gradeLevel ? gradeLookup.get(s.gradeLevel) : 'N/A'}</TableCell>
                     <TableCell>
                       <Box>
                         <IconButton onClick={(e) => {

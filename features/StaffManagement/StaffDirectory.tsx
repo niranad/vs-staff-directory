@@ -1,7 +1,8 @@
-import { Box, Tab, Tabs, Typography } from '@mui/material'
+import { Alert, Box, Snackbar, Tab, Tabs, Typography } from '@mui/material'
 import React from 'react'
 import StaffDirectoryTable from './StaffDirectory.table'
 import GradeLevelTable from './GradeLevel.table';
+import { useSnackBarContext } from '@/context/snackbar/snackbar.context';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -34,6 +35,7 @@ function CustomTabPanel(props: TabPanelProps) {
 
 export default function StaffDirectory() {
   const [value, setValue] = React.useState(0);
+  const { open, closeSnackBar, severity, message } = useSnackBarContext();
 
    const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -82,6 +84,20 @@ export default function StaffDirectory() {
             </Box>
           </Box>
         </Box>
+
+        <Snackbar
+          open={open}
+          autoHideDuration={6000}
+          onClose={closeSnackBar}
+        >
+          <Alert
+            onClose={closeSnackBar}
+            severity={severity}
+            variant="filled"
+            className="!text-lg"
+            sx={{ width: '100%' }}
+          >{message}</Alert>
+        </Snackbar>
       </Box>
     </Box>
   )

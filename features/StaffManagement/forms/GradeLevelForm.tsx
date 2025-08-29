@@ -1,43 +1,50 @@
-import { Alert, Box, Button, Grid, Snackbar, TextField, Typography } from "@mui/material";
+import { Box, Button, Grid, TextField, Typography } from "@mui/material";
 import { Controller } from "react-hook-form";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect } from "react";
 import { GradeLevel } from "@/model/GradeLevel";
 import { useGradeLevelContext } from "@/context/gradeLevel/gradeLevel.context";
 import { useGradeLevelForm } from "../hooks/useGradeLevelForm";
+import { useSnackBarContext } from "@/context/snackbar/snackbar.context";
 
 export function GradeLevelForm() {
-  const { updateGradeLevel, createGradeLevel, toggleLevelFlipped } = useGradeLevelContext();
+  const { 
+    updateGradeLevel, 
+    createGradeLevel, 
+    toggleLevelFlipped,
+    flippedSideState,
+    currentGradeLevel,
+  } = useGradeLevelContext();
   const { formState, control, reset, trigger, getValues } = useGradeLevelForm();
-  const [open, setOpen] = useState(false);
-  const [message, setMessage] = useState("");
-  const [hasError, setHasError] = useState(false);
+  const { openSnackBar } = useSnackBarContext();
 
-  const handleClose = useCallback(() => {
-    setOpen(false);
-  }, []);
   const handleSave = useCallback(async () => {
     const isValid = await trigger();
     if (!isValid) {
-      setMessage("Please fix the errors in the form.");
-      setHasError(true);
-      setOpen(true);
+      openSnackBar({message: "Please fix the errors in the form.", severity: "error"});
       return;
     } else {
       if (!getValues("id")) {
         createGradeLevel(getValues() as GradeLevel);
       } else {
         updateGradeLevel(getValues() as GradeLevel);
+        console.log("I am called")
       }
       reset();
-      setOpen(true);
+      openSnackBar({message: "Grade level saved successfully!", severity: "success"});
       toggleLevelFlipped();
-      setMessage("Grade level saved successfully!");
     }
   }, [])
   const handleCancel = () => {
     reset();
     toggleLevelFlipped();
   }
+
+  useEffect(() => {
+    if (flippedSideState === 'edit' && currentGradeLevel !== null) {
+      console.log("Getting hit!!!!!!!");
+      reset(currentGradeLevel);
+    } 
+  }, [flippedSideState, currentGradeLevel])
 
   return (
     <Box className="flex flex gap-4 w-full">
@@ -96,19 +103,6 @@ export function GradeLevelForm() {
           </Box>
         </Grid>
       </Grid>
-
-      <Snackbar
-        open={open}
-        autoHideDuration={6000}
-        onClose={handleClose}
-      >
-        <Alert
-          onClose={handleClose}
-          severity={hasError ? "error" : "success"}
-          variant="filled"
-          sx={{ width: '100%' }}
-        >{message}</Alert>
-      </Snackbar>
     </Box>
   );
 }

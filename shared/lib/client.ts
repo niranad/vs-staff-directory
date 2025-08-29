@@ -49,7 +49,7 @@ export const localStorageClient = {
     return grades !== null ? JSON.parse(grades) : [];
   },
   getGradeLevelById: (id: string): GradeLevel | null => {
-    let gradeLevel = localStorage.getItem(STAFF_KEY);
+    let gradeLevel = localStorage.getItem(GRADE_LEVEL_KEY);
     if (gradeLevel !== null) {
       const gradeLevels: GradeLevel[] = JSON.parse(gradeLevel);
       return gradeLevels.find(l => l.id === id) || null;
