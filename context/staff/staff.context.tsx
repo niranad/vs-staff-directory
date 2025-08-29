@@ -69,8 +69,10 @@ export const StaffProvider: React.FC<{children: React.ReactNode}> = ({ children 
               const stateCountry = s.split(/\s/);
               return { name: stateCountry[0], country: stateCountry[1] };
             })
-          dispatch({ type: StaffActionType.SET_COUNTRIES, payload: Array.from(countries) })
-          dispatch({ type: StaffActionType.SET_STATES, payload: countryStates });
+          const ascCountries = Array.from(countries).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+          const ascCountryStates = Array.from(countryStates).sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+          dispatch({ type: StaffActionType.SET_COUNTRIES, payload: Array.from(ascCountries) })
+          dispatch({ type: StaffActionType.SET_STATES, payload: ascCountryStates });
         }
       }).catch((err) => {
         console.error("Error while fetching countries: ", err);
