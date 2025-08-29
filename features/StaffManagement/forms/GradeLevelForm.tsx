@@ -27,7 +27,6 @@ export function GradeLevelForm() {
         createGradeLevel(getValues() as GradeLevel);
       } else {
         updateGradeLevel(getValues() as GradeLevel);
-        console.log("I am called")
       }
       reset();
       openSnackBar({message: "Grade level saved successfully!", severity: "success"});
@@ -43,8 +42,13 @@ export function GradeLevelForm() {
     if (["view", "edit"].includes(flippedSideState) && currentGradeLevel !== null) {
       reset(currentGradeLevel);
     }
-    if (flippedSideState === "create") reset();
-  }, [flippedSideState, currentGradeLevel, reset])
+    if (flippedSideState === "create") {
+      const currentGrade = getValues();
+      currentGrade.level = '';
+      currentGrade.sort = 0;
+      reset(currentGrade);
+    } 
+  }, [flippedSideState, currentGradeLevel])
 
   return (
     <Box className="flex flex gap-4 w-full">

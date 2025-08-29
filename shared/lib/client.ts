@@ -71,8 +71,8 @@ export const localStorageClient = {
       gradeList[existingIndex] = grade;
     } else {
       gradeList.push(grade);
-      localStorage.setItem(GRADE_LEVEL_KEY, JSON.stringify(gradeList));
     }
+    localStorage.setItem(GRADE_LEVEL_KEY, JSON.stringify(gradeList));
   },
   deleteGradeLevel: (id: string) => {
     let grades = localStorage.getItem(GRADE_LEVEL_KEY);

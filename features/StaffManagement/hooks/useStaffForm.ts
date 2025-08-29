@@ -22,6 +22,7 @@ export const useStaffForm = () => {
       state: '',
       gradeLevel: '',
     },
+    mode: 'onChange'
   })
 
   return { control, formState, reset, trigger, setValue, getValues }

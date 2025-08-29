@@ -8,19 +8,20 @@ import { Staff } from "@/model/Staff";
 import { useGradeLevelContext } from "@/context/gradeLevel/gradeLevel.context";
 import { CountryState } from "@/model/CountryState";
 import { useSnackBarContext } from "@/context/snackbar/snackbar.context";
+import { FlippedSideState } from "@/context/staff/staff.reducer";
 
 export function StaffForm() {
   const { 
     updateStaff, 
     createStaff, 
-    toggleFlipped, 
+    toggleFlipped,
     flippedSideState, 
     countries,
     states,
     currentStaff,
   } = useStaffContext();
   const { gradeLevels } = useGradeLevelContext();
-  const { formState, control, reset, trigger, getValues } = useStaffForm();
+  const { formState, control, reset, trigger, setValue, getValues } = useStaffForm();
   const { openSnackBar } = useSnackBarContext();
   const [filteredStates, setFilteredStates] = useState<CountryState[]>(states);
   const [selectedState, setSelectedState] = useState<string>("");
@@ -67,10 +68,22 @@ export function StaffForm() {
       setGradeValue(currentStaff.gradeLevel ?? "");
     }
     if (flippedSideState === "create") {
-      console.log("Am i hit!!!!!!!!!")
-      reset();
+      const currentStaff = getValues();
+      currentStaff.id = '';
+      currentStaff.name = '';
+      currentStaff.department = '';
+      currentStaff.address = '';
+      currentStaff.role = '';
+      currentStaff.country = '';
+      currentStaff.state = '';
+      currentStaff.gradeLevel = null;
+      setSelectedState("");
+      setGradeValue("");
+      reset(currentStaff);
     }
-  }, [flippedSideState, currentStaff, reset])
+
+    return () => {}
+  }, [flippedSideState, currentStaff])
 
   return (
     <Box className="flex flex gap-4 w-full">
@@ -88,6 +101,7 @@ export function StaffForm() {
                   <TextField
                     {...field}
                     label="Name"
+                    value={field.value}
                     error={Boolean(formState.errors.name)}
                     helperText={formState.errors.name?.message}
                     variant="outlined"
@@ -113,6 +127,7 @@ export function StaffForm() {
                   <TextField
                     {...field}
                     label="Role"
+                    value={field.value}
                     error={Boolean(formState.errors.role)}
                     helperText={formState.errors.role?.message}
                     variant="outlined"
