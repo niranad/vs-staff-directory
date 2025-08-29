@@ -40,11 +40,11 @@ export function GradeLevelForm() {
   }
 
   useEffect(() => {
-    if (flippedSideState === 'edit' && currentGradeLevel !== null) {
-      console.log("Getting hit!!!!!!!");
+    if (["view", "edit"].includes(flippedSideState) && currentGradeLevel !== null) {
       reset(currentGradeLevel);
-    } 
-  }, [flippedSideState, currentGradeLevel])
+    }
+    if (flippedSideState === "create") reset();
+  }, [flippedSideState, currentGradeLevel, reset])
 
   return (
     <Box className="flex flex gap-4 w-full">
@@ -66,6 +66,7 @@ export function GradeLevelForm() {
                     helperText={formState.errors.level?.message}
                     variant="outlined"
                     fullWidth
+                    disabled={flippedSideState === "view"}
                   />
                 </Box>
               )}
@@ -90,18 +91,23 @@ export function GradeLevelForm() {
                     helperText={formState.errors.sort?.message}
                     variant="outlined"
                     fullWidth
+                    disabled={flippedSideState === "view"}
                   />
                 </Box>
               )}
             ></Controller>
           </Box>
         </Grid>
-        <Grid size={{xs: 12}}>
-          <Box className="flex justify-center items-center gap-8 mt-2">
-            <Button variant="outlined" size="medium" color="error" onClick={handleCancel}>Cancel</Button>
-            <Button variant="contained" size="medium" className="bg-[#1e1e1e]" onClick={handleSave}>Save</Button>
-          </Box>
-        </Grid>
+        {
+          flippedSideState !== "view" ? (
+            <Grid size={{xs: 12}}>
+              <Box className="flex justify-center items-center gap-8 mt-2">
+                <Button variant="outlined" size="medium" color="error" onClick={handleCancel}>Cancel</Button>
+                <Button variant="contained" size="medium" className="bg-[#1e1e1e]" onClick={handleSave}>Save</Button>
+              </Box>
+            </Grid>
+          ) : null
+        }
       </Grid>
     </Box>
   );

@@ -62,12 +62,9 @@ export default function GradeLevelTable() {
     setAnchorEl(null);
   }
  
-  const handleView = () => {
-    setFlippedSideState("view");
-  }
 
-  const handleEdit = () => {
-    setFlippedSideState("edit");
+  const handleAction = (action: "view" | "edit") => {
+    setFlippedSideState(action);
     fetchGradeLevelById(selectedRow!.id);
     reset(selectedRow!);
     handleMenuClose();
@@ -82,6 +79,8 @@ export default function GradeLevelTable() {
 
   const handleAddGradeLevel = useCallback(() => {
     setFlippedSideState("create");
+    fetchGradeLevelById(""); // Set currentGradeLevel to null
+    reset();
     toggleLevelFlipped();
   }, [])
 
@@ -143,7 +142,7 @@ export default function GradeLevelTable() {
           />
           <Table className="shadow-md" aria-label="staff table">
             <TableHead>
-              <TableRow>
+              <TableRow className="!font-bold">
                 {/* Table Headers */}
                 <TableCell>S/N</TableCell>
                 <TableCell>Level</TableCell>
@@ -192,8 +191,8 @@ export default function GradeLevelTable() {
               },
             }}
           >
-            <MenuItem onClick={handleView} className="!text-lg">View</MenuItem>
-            <MenuItem onClick={handleEdit} className="!text-lg !text-blue-500">Edit</MenuItem>
+            <MenuItem onClick={() => handleAction("view")} className="!text-lg">View</MenuItem>
+            <MenuItem onClick={() => handleAction("edit")} className="!text-lg !text-blue-500">Edit</MenuItem>
             <MenuItem onClick={handleDelete} className="!text-lg !text-red-500">Delete</MenuItem>
           </Menu>
         </Box>
@@ -211,7 +210,7 @@ export default function GradeLevelTable() {
         }}>
           <Button 
             className="border-2 rounded-md" 
-            size="medium" 
+            size="large" 
             onClick={() => toggleLevelFlipped()}
           >
             Back to List

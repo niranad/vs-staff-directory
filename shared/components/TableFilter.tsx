@@ -17,9 +17,8 @@ function TableFilter({
   onColumnChange, 
   onInputChange
 }: TableFilterProps) {
-
   return (
-    <Box className="w-full">
+    <Box className="w-full !text-lg">
       <Box className="flex gap-8 ">
         <Select
           className="w-[150px]"
@@ -27,8 +26,8 @@ function TableFilter({
           value={selectedColumn}
           onChange={onColumnChange}
         >
-          <MenuItem value="" disabled>
-            <em>None</em>
+          <MenuItem value="" disabled selected>
+            <em>Select column</em>
           </MenuItem>
           {
             columns.map((c, i) => (
@@ -37,7 +36,7 @@ function TableFilter({
           }
         </Select>
         <TextField
-          className="w-[150px]"
+          className="w-[150px] !text-lg"
           name="Value"
           value={filterValue}
           placeholder='Filter value'

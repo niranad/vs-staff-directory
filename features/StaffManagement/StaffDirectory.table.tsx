@@ -1,4 +1,4 @@
-import { Alert, Box, Button, IconButton, Menu, MenuItem, Snackbar, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
+import { Box, Button, IconButton, Menu, MenuItem, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
 import { StaffForm } from "./forms/StaffForm";
 import { useStaffContext } from "@/context/staff/staff.context";
@@ -9,6 +9,7 @@ import { Staff } from "@/model/Staff";
 import { FlippedSideState } from "@/context/staff/staff.reducer";
 import { useGradeLevelContext } from "@/context/gradeLevel/gradeLevel.context";
 import TableFilter from "@/shared/components/TableFilter";
+import { useSnackBarContext } from "@/context/snackbar/snackbar.context";
 
 
 const flippedSideStateTitle: Record<FlippedSideState, string> = {
@@ -40,10 +41,9 @@ export default function StaffDirectoryTable() {
   } = useStaffContext();
   const { gradeLevels } = useGradeLevelContext();
   const { reset } = useStaffForm();
+  const { openSnackBar } = useSnackBarContext();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedRow, setSelectedRow] = useState<Staff | null>(null);
-  const [openSnackBar, setOpenSnackBar] = useState(false);
-  const [message, setMessage] = useState("");
   const [selectedColumn, setSelectedColumn] = useState<string>("");
   const [filteredStaff, setFilteredStaff] = useState<Staff[]>([]);
   const [filterValue, setFilterValue] = useState<string>("");
@@ -54,9 +54,6 @@ export default function StaffDirectoryTable() {
     return lookup;
   }, [gradeLevels]);
 
-  const handleClose = () => {
-    setOpenSnackBar(false);
-  }
   const handleMenuClose = () => {
     setAnchorEl(null);
     setSelectedRow(null);
@@ -69,15 +66,13 @@ export default function StaffDirectoryTable() {
 
   const handleAdd = () => {
     setFlippedSideState("create");
+    fetchStaffById(""); // Set currentStaff to null
+    reset();
     toggleFlipped();
   }
-
-  const handleView = () => {
-    setFlippedSideState("view");
-  }
   
-  const handleEdit = () => {
-    setFlippedSideState("edit");
+  const handleAction = (action: "view" | "edit") => {
+    setFlippedSideState(action);
     fetchStaffById(selectedRow!.id);
     reset(selectedRow!);
     handleMenuClose();
@@ -86,7 +81,7 @@ export default function StaffDirectoryTable() {
 
   const handleDelete = () => {
     deleteStaff(selectedRow!.id);
-    setMessage("Staff deleted successfully!");
+    openSnackBar({ message: "Staff deleted successfully!", severity: "success" });
     handleMenuClose();
   }
 
@@ -153,7 +148,7 @@ export default function StaffDirectoryTable() {
 
           <Table className="shadow-md" aria-label="staff table">
             <TableHead>
-              <TableRow>
+              <TableRow className="!font-bold">
                 {/* Table Headers */}
                 <TableCell>S/N</TableCell>
                 <TableCell>Name</TableCell>
@@ -213,8 +208,8 @@ export default function StaffDirectoryTable() {
               },
             }}
           >
-            <MenuItem onClick={handleView} className="!text-lg">View</MenuItem>
-            <MenuItem onClick={handleEdit} className="!text-lg !text-blue-500">Edit</MenuItem>
+            <MenuItem onClick={() => handleAction("view")} className="!text-lg">View</MenuItem>
+            <MenuItem onClick={() => handleAction("edit")} className="!text-lg !text-blue-500">Edit</MenuItem>
             <MenuItem onClick={handleDelete} className="!text-lg !text-red-500">Delete</MenuItem>
           </Menu>
         </Box>
@@ -232,7 +227,7 @@ export default function StaffDirectoryTable() {
         }}>
           <Button 
             className="border-2 rounded-md" 
-            size="medium" 
+            size="large" 
             onClick={() => toggleFlipped()}
           >
             Back to List
@@ -247,19 +242,6 @@ export default function StaffDirectoryTable() {
           </Box>
         </Box>
       </Box>
-
-      <Snackbar
-        open={openSnackBar}
-        autoHideDuration={6000}
-        onClose={handleClose}
-      >
-        <Alert
-          onClose={handleClose}
-          severity="success"
-          variant="filled"
-          sx={{ width: '100%' }}
-        >{message}</Alert>
-      </Snackbar>
     </Box>
   )
 }

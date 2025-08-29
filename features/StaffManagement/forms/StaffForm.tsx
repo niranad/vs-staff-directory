@@ -60,13 +60,17 @@ export function StaffForm() {
   }, [])
 
   useEffect(() => {
-    if (flippedSideState === 'edit' && currentStaff !== null) {
+    if (["view", "edit"].includes(flippedSideState) && currentStaff !== null) {
       reset(currentStaff);
       setFilteredStates(states.filter((s) => s.country === currentStaff.country));
       setSelectedState(currentStaff.state);
       setGradeValue(currentStaff.gradeLevel ?? "");
-    } 
-  }, [flippedSideState, currentStaff])
+    }
+    if (flippedSideState === "create") {
+      console.log("Am i hit!!!!!!!!!")
+      reset();
+    }
+  }, [flippedSideState, currentStaff, reset])
 
   return (
     <Box className="flex flex gap-4 w-full">
@@ -88,6 +92,7 @@ export function StaffForm() {
                     helperText={formState.errors.name?.message}
                     variant="outlined"
                     fullWidth
+                    disabled={flippedSideState === "view"}
                     margin="none"
                   />
                 </Box>
@@ -112,6 +117,7 @@ export function StaffForm() {
                     helperText={formState.errors.role?.message}
                     variant="outlined"
                     fullWidth
+                    disabled={flippedSideState === "view"}
                     margin="none"
                   />
                 </Box>
@@ -136,6 +142,7 @@ export function StaffForm() {
                     helperText={formState.errors.department?.message}
                     variant="outlined"
                     fullWidth
+                    disabled={flippedSideState === "view"}
                     margin="none"
                   />
                 </Box>
@@ -162,6 +169,7 @@ export function StaffForm() {
                       handleCountryChange(e);
                     }}
                     fullWidth
+                    disabled={flippedSideState === "view"}
                   >
                     <MenuItem disabled value="">
                       <em>None</em>
@@ -197,6 +205,7 @@ export function StaffForm() {
                       handleStateChange(e);
                     }}
                     fullWidth
+                    disabled={flippedSideState === "view"}
                   >
                     <MenuItem disabled value="">
                       <em>None</em>
@@ -229,6 +238,7 @@ export function StaffForm() {
                     helperText={formState.errors.address?.message}
                     variant="outlined"
                     fullWidth
+                    disabled={flippedSideState === "view"}
                     margin="none"
                   />
                 </Box>
@@ -258,6 +268,7 @@ export function StaffForm() {
                       handleGradeLevelChange(e);
                     }}
                     fullWidth
+                    disabled={flippedSideState === "view"}
                   >
                     <MenuItem disabled value="">
                       <em>None</em>
@@ -271,12 +282,17 @@ export function StaffForm() {
             ></Controller>
           </Box>
         </Grid>
-        <Grid size={{xs: 12}}>
-          <Box className="flex justify-center items-center gap-8 mt-2">
-            <Button variant="outlined" size="medium" color="error" onClick={handleCancel}>Cancel</Button>
-            <Button variant="contained" size="medium" className="bg-[#1e1e1e]" onClick={handleSave}>Save</Button>
-          </Box>
-        </Grid>
+        {
+          flippedSideState !== "view" ? (
+            <Grid size={{xs: 12}}>
+              <Box className="flex justify-center items-center gap-8 mt-2">
+                <Button variant="outlined" size="medium" color="error" onClick={handleCancel}>Cancel</Button>
+                <Button variant="contained" size="medium" className="bg-[#1e1e1e]" onClick={handleSave}>Save</Button>
+              </Box>
+            </Grid>
+          ) : null
+        }
+        
       </Grid>
     </Box>
   );

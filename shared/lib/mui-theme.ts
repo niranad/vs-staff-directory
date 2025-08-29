@@ -1,6 +1,29 @@
 import { createTheme, responsiveFontSizes } from "@mui/material";
 
 const theme = createTheme({
+  components: {
+    MuiOutlinedInput: {
+      styleOverrides: {
+        input: {
+          '&.Mui-disabled': {
+            color: '#708090',
+          },
+        },
+        notchedOutline: {
+          borderColor: '#708090',
+        },
+      },
+    },
+    MuiInputLabel: {
+      styleOverrides: {
+        root: {
+          '&.Mui-disabled': {
+            color: '#708090',
+          },
+        },
+      },
+    },
+  },
   palette: {
     primary: {
       main: '#0072ff',
